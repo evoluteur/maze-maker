@@ -134,7 +134,7 @@
 /* the four shapes, under "About this drawing" */
 .about .shapes {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 14px;
   margin: 20px 0 10px;
 }

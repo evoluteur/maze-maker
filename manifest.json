@@ -1,7 +1,7 @@
 {
   "name": "Maze Maker",
   "short_name": "Maze",
-  "description": "Maze maker: generate square, circular, triangular and heart-shaped mazes, solve them with the keyboard or a finger, and export them as SVG or PNG.",
+  "description": "Maze maker: generate square, circular, triangular, hexagonal, star and heart-shaped mazes, solve them with the keyboard or a finger, and export them as SVG or PNG.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -1,4 +1,4 @@
-const CACHE = "maze-maker-v11";
+const CACHE = "maze-maker-v13";
 const ASSETS = [
   "./",
   "index.html",
@@ -21,6 +21,8 @@ const ASSETS = [
   "img/maze-square.png",
   "img/maze-cicle.png",
   "img/maze-triangle.png",
+  "img/maze-hexagon.png",
+  "img/maze-star.png",
   "img/maze-heart.png",
   "js/omg.js",
   "js/maze.js",

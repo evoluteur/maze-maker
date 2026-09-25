@@ -19,6 +19,8 @@ const SHAPES = [
   { id: "square", label: "Square", icon: shapeIcon("M4 4h16v16H4z") },
   { id: "circle", label: "Circle", icon: shapeIcon("M3.5 12a8.5 8.5 0 1 0 17 0a8.5 8.5 0 1 0-17 0z") },
   { id: "triangle", label: "Triangle", icon: shapeIcon("M12 3.5 21.2 19.5H2.8z") },
+  { id: "hexagon", label: "Hexagon", icon: shapeIcon("M21 12 16.5 19.8H7.5L3 12 7.5 4.2H16.5z") },
+  { id: "star", label: "Star", icon: shapeIcon("M12 2.4 14.9 7.4H20.7L17.8 12.4 20.7 17.4H14.9L12 22.4 9.1 17.4H3.3L6.2 12.4 3.3 7.4H9.1z") },
   { id: "heart", label: "Heart", icon: shapeIcon("M12 20.5C6.5 16.6 3 13.4 3 9.3 3 6.6 5 4.5 7.6 4.5c1.8 0 3.4 1 4.4 2.6 1-1.6 2.6-2.6 4.4-2.6 2.6 0 4.6 2.1 4.6 4.8 0 4.1-3.5 7.3-9 11.2z") },
 ];
 
@@ -279,6 +281,170 @@ const triangleGrid = (n) => {
   };
 };
 
+// A six-pointed star on the triangle lattice. Each of the two big triangles
+// has sides of 3m small cells, so every edge of the star falls on cell walls
+// and the outline stays straight. Row r, column k: a triangle points up or
+// down in turn along the row. The entrance is on the flat top of the upper
+// left point, the exit under the flat bottom of the lower right point.
+const starGrid = (m) => {
+  const s = W * 1.6, h = (s * Math.sqrt(3)) / 2;
+  const R = 4 * m, C = 6 * m;
+  const X = (3 * m * s) / 2; // the star's axis
+  const p = (3 * m + 1) % 2; // puts the lattice corners on the star's corners
+  const isUp = (r, k) => (r + k + p) % 2 === 0;
+  const vertsRK = (r, k) => {
+    const x0 = (k * s) / 2;
+    return isUp(r, k)
+      ? [[x0 + s / 2, r * h], [x0 + s, (r + 1) * h], [x0, (r + 1) * h]]
+      : [[x0, r * h], [x0 + s, r * h], [x0 + s / 2, (r + 1) * h]];
+  };
+  const inTri = (pt, v) => {
+    const cross = (a, b) => (b[0] - a[0]) * (pt[1] - a[1]) - (b[1] - a[1]) * (pt[0] - a[0]);
+    const d = [cross(v[0], v[1]), cross(v[1], v[2]), cross(v[2], v[0])];
+    return !(d.some((x) => x < 0) && d.some((x) => x > 0));
+  };
+  const bigUp = [[X, 0], [X + 1.5 * m * s, 3 * m * h], [X - 1.5 * m * s, 3 * m * h]];
+  const bigDown = [[X - 1.5 * m * s, m * h], [X + 1.5 * m * s, m * h], [X, 4 * m * h]];
+  const at = new Int32Array(R * C).fill(-1);
+  const rc = [];
+  for (let r = 0; r < R; r++) {
+    for (let k = 0; k < C; k++) {
+      const v = vertsRK(r, k);
+      const c = [(v[0][0] + v[1][0] + v[2][0]) / 3, (v[0][1] + v[1][1] + v[2][1]) / 3];
+      if (inTri(c, bigUp) || inTri(c, bigDown)) { at[r * C + k] = rc.length; rc.push([r, k]); }
+    }
+  }
+  const idAt = (r, k) => (r >= 0 && r < R && k >= 0 && k < C ? at[r * C + k] : -1);
+  const N = rc.length;
+  const up = (i) => isUp(rc[i][0], rc[i][1]);
+  const verts = (i) => vertsRK(rc[i][0], rc[i][1]);
+  const vertRK = (i) => (up(i) ? [rc[i][0] + 1, rc[i][1]] : [rc[i][0] - 1, rc[i][1]]);
+  const vert = (i) => idAt(...vertRK(i));
+  const nb = rc.map(([r, k], i) => [idAt(r, k - 1), idAt(r, k + 1), vert(i)].filter((x) => x >= 0));
+  const center = (i) => {
+    const v = verts(i);
+    return [(v[0][0] + v[1][0] + v[2][0]) / 3, (v[0][1] + v[1][1] + v[2][1]) / 3];
+  };
+  // entrance: the leftmost cell of row m (the tip of the upper left point, a
+  // downward cell with a flat top); exit: the rightmost cell of row 3m - 1
+  let start = -1, goal = -1;
+  for (let k = 0; k < C && start < 0; k++) start = idAt(m, k);
+  for (let k = C - 1; k >= 0 && goal < 0; k--) goal = idAt(3 * m - 1, k);
+  const midX = (i, a, b) => (verts(i)[a][0] + verts(i)[b][0]) / 2;
+  const side = Math.max(3 * m * s, 4 * m * h) + 2 * W;
+  const seg = (a, b) => `M${P(a)}L${P(b)}`;
+  return {
+    kind: "star", N, nb, start, goal, seams: true,
+    label: `${N} cells`,
+    view: [X - side / 2, 2 * m * h - side / 2, side, side],
+    center,
+    enter: [midX(start, 0, 1), m * h - W * 0.9],
+    exit: [midX(goal, 2, 1), 3 * m * h + W * 0.9],
+    cellAt: (x, y) => {
+      const r = Math.floor(y / h), k0 = Math.floor(x / (s / 2));
+      for (let k = k0 - 2; k <= k0 + 1; k++) {
+        const i = idAt(r, k);
+        if (i >= 0 && inTri([x, y], verts(i))) return i;
+      }
+      return -1;
+    },
+    step: (i, key) => {
+      const [r, k] = rc[i];
+      if (key === "ArrowLeft") return [idAt(r, k - 1)].filter((x) => x >= 0);
+      if (key === "ArrowRight") return [idAt(r, k + 1)].filter((x) => x >= 0);
+      if ((key === "ArrowDown" && up(i)) || (key === "ArrowUp" && !up(i))) return [vert(i)].filter((x) => x >= 0);
+      return [];
+    },
+    cellShape: (i) => { const v = verts(i); return `M${P(v[0])}L${P(v[1])}L${P(v[2])}Z`; },
+    floorD: () => [bigUp, bigDown].map((t) => `M${P(t[0])}L${P(t[1])}L${P(t[2])}Z`).join(""),
+    seg: (a, b) => ` L${P(center(b))}`,
+    // each cell draws its left edge, its right edge on the outline, and its
+    // flat edge when it is an upward cell or sits on the outline
+    walls: (lk) => {
+      let d = "";
+      for (let i = 0; i < N; i++) {
+        const v = verts(i), [r, k] = rc[i];
+        const left = idAt(r, k - 1), right = idAt(r, k + 1), other = vert(i);
+        if (left < 0 || !lk(i, left)) d += seg(v[0], v[2]);
+        if (right < 0) d += up(i) ? seg(v[0], v[1]) : seg(v[1], v[2]);
+        if (up(i)) {
+          if (!(i === goal && other < 0) && (other < 0 || !lk(i, other))) d += seg(v[2], v[1]);
+        } else if (other < 0 && i !== start) d += seg(v[0], v[1]);
+      }
+      return d;
+    },
+  };
+};
+
+// A big hexagon of hexagonal cells (a honeycomb), in axial coordinates
+// (q, r); every cell has up to six neighbors. The entrance is on the left
+// corner, the exit on the right one.
+const hexGrid = (n) => {
+  const a = W * 0.62; // cell radius, center to corner
+  const D = [[1, 0], [0, 1], [-1, 1], [-1, 0], [0, -1], [1, -1]]; // at 0, 60, ... 300 degrees
+  const key = (q, r) => `${q},${r}`;
+  const qr = [], at = new Map();
+  for (let r = -(n - 1); r <= n - 1; r++) {
+    for (let q = -(n - 1); q <= n - 1; q++) {
+      if (Math.abs(q + r) > n - 1) continue;
+      at.set(key(q, r), qr.length);
+      qr.push([q, r]);
+    }
+  }
+  const N = qr.length;
+  const idAt = (q, r) => (at.has(key(q, r)) ? at.get(key(q, r)) : -1);
+  const nbDir = (i, d) => idAt(qr[i][0] + D[d][0], qr[i][1] + D[d][1]);
+  const nb = qr.map((_, i) => D.map((_, d) => nbDir(i, d)).filter((x) => x >= 0));
+  const center = (i) => [a * Math.sqrt(3) * (qr[i][0] + qr[i][1] / 2), a * 1.5 * qr[i][1]];
+  const corner = (i, deg) => {
+    const [x, y] = center(i), t = (deg * Math.PI) / 180;
+    return [x + a * Math.cos(t), y + a * Math.sin(t)];
+  };
+  const start = idAt(-(n - 1), 0), goal = idAt(n - 1, 0);
+  const w = (2 * n - 1) * Math.sqrt(3) * a, side = w + 2 * W;
+  const edge = (i, d) => `M${P(corner(i, 60 * d - 30))}L${P(corner(i, 60 * d + 30))}`;
+  return {
+    kind: "hexagon", N, nb, start, goal, seams: true,
+    label: `${n} rings`,
+    view: [-side / 2, -side / 2, side, side],
+    center,
+    enter: [center(start)[0] - a * 1.8, 0],
+    exit: [center(goal)[0] + a * 1.8, 0],
+    cellAt: (x, y) => {
+      const fq = ((Math.sqrt(3) / 3) * x - y / 3) / a, fr = ((2 / 3) * y) / a, fs = -fq - fr;
+      let q = Math.round(fq), r = Math.round(fr);
+      const s = Math.round(fs);
+      const dq = Math.abs(q - fq), dr = Math.abs(r - fr), ds = Math.abs(s - fs);
+      if (dq > dr && dq > ds) q = -r - s;
+      else if (dr > ds) r = -q - s;
+      return idAt(q, r);
+    },
+    // left and right go straight across; up and down try both slanted neighbors
+    step: (i, k) => {
+      const dirs = { ArrowRight: [0], ArrowLeft: [3], ArrowUp: [5, 4], ArrowDown: [1, 2] }[k] || [];
+      return dirs.map((d) => nbDir(i, d)).filter((x) => x >= 0);
+    },
+    cellShape: (i) => [0, 1, 2, 3, 4, 5].map((c, j) => `${j ? "L" : "M"}${P(corner(i, 60 * c - 30))}`).join("") + "Z",
+    floorD() { return qr.map((_, i) => this.cellShape(i)).join(""); },
+    seg: (a2, b) => ` L${P(center(b))}`,
+    // each cell draws its walls toward the three neighbors at 0, 60 and
+    // 120 degrees, and any wall on the outline
+    walls: (lk) => {
+      let d = "";
+      for (let i = 0; i < N; i++) {
+        for (let dd = 0; dd < 6; dd++) {
+          const o = nbDir(i, dd);
+          if (o < 0) {
+            if ((i === start && dd === 3) || (i === goal && dd === 0)) continue;
+            d += edge(i, dd);
+          } else if (dd < 3 && !lk(i, o)) d += edge(i, dd);
+        }
+      }
+      return d;
+    },
+  };
+};
+
 // Rings of cells around a center cell; a ring splits its cells in two when
 // they would get much wider than they are deep. Angles are measured from
 // the bottom (where the entrance is), toward +x.
@@ -378,6 +544,8 @@ const circleGrid = (R) => {
 const gridOf = () => {
   if (S.shape === "circle") return circleGrid(Math.max(3, Math.round(S.size / 2)));
   if (S.shape === "triangle") return triangleGrid(Math.max(4, Math.round(S.size * 0.8)));
+  if (S.shape === "hexagon") return hexGrid(Math.max(3, Math.round(S.size / 2)));
+  if (S.shape === "star") return starGrid(Math.max(2, Math.round(S.size * 0.3)));
   if (S.shape === "heart") return heartGrid(Math.max(12, S.size + 4)); // the heart leaves the corners empty
   return squareGrid(S.size);
 };

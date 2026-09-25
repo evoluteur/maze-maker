@@ -6,7 +6,7 @@
     <title>Maze Maker</title>
     <meta
       name="description"
-      content="Maze maker: generate square, round, triangular and heart-shaped mazes with seven algorithms, solve them with the arrow keys or your finger, show the solution, and download or print them as SVG or PNG. Free, works offline."
+      content="Maze maker: generate square, round, triangular, hexagonal, star and heart-shaped mazes with seven algorithms, solve them with the arrow keys or your finger, show the solution, and download or print them as SVG or PNG. Free, works offline."
     />
     <meta name="author" content="Olivier Giulieri" />
     <link rel="canonical" href="https://evoluteur.github.io/maze-maker/" />
@@ -71,7 +71,7 @@
     <div class="content">
       <p class="tagline">
         A maze is a puzzle: branching passages, dead ends, and a way through.
-        Pick a shape (square, circle, triangle or heart) and an algorithm, and a new maze draws itself. Find your
+        Pick a shape (square, circle, triangle, hexagon, star or heart) and an algorithm, and a new maze draws itself. Find your
         way with the arrow keys or your finger, or let the computer show you.
         Curious how it works? Read <a href="about.html">about mazes</a>.
       </p>
@@ -89,8 +89,9 @@
             <h3>Solve</h3>
             <p class="note">
               Arrow keys (or WASD) move the dot. On a circle, up goes toward
-              the center; on a triangle, up and down cross the flat side of
-              the cell. Or drag the dot with your mouse or finger.
+              the center; on a triangle or a star, up and down cross the flat
+              side of the cell; on a hexagon, up and down try both slanted
+              sides. Or drag the dot with your mouse or finger.
             </p>
             <div class="btns" style="margin-top: 10px">
               <button type="button" id="solve">Show solution</button>

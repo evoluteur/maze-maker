@@ -1,6 +1,6 @@
 # Maze-Maker
 
-Make a maze right in your browser: square, round, triangular or heart-shaped, with long winding corridors or a thicket of short dead ends. Then find your way through it with the arrow keys or a finger, or watch the solution draw itself, and save it as an SVG or a PNG, or print it. No sign-up and no libraries.
+Make a maze right in your browser: square, round, triangular, hexagonal, star or heart-shaped, with long winding corridors or a thicket of short dead ends. Then find your way through it with the arrow keys or a finger, or watch the solution draw itself, and save it as an SVG or a PNG, or print it. No sign-up and no libraries.
 
 - [Make a maze](https://evoluteur.github.io/maze-maker/)
 
@@ -14,15 +14,19 @@ A maze is a puzzle: it has branches and dead ends, and a way through. (A labyrin
   - **Square**: a grid, entered at the top left and left at the bottom right.
   - **Circle**: rings of cells, entered from the outside with the goal at the center.
   - **Triangle**: a big triangle cut into small triangular cells, entered and left at the bottom corners.
+  - **Hexagon**: a honeycomb of hexagonal cells, each with up to six neighbors, entered on the left corner and left on the right one.
+  - **Star**: a six-pointed star cut from the triangle grid, so its edges stay straight, entered at the top of the upper left point and left under the lower right point.
   - **Heart**: a square grid cut to the shape of a heart, entered at the top of the left lobe and left at the tip.
 
 <p>
-  <img src="img/maze-square.png" alt="Square maze" width="24%" />
-  <img src="img/maze-cicle.png" alt="Circular maze" width="24%" />
-  <img src="img/maze-triangle.png" alt="Triangular maze" width="24%" />
-  <img src="img/maze-heart.png" alt="Heart-shaped maze" width="24%" />
+  <img src="img/maze-square.png" alt="Square maze" width="32%" />
+  <img src="img/maze-cicle.png" alt="Circular maze" width="32%" />
+  <img src="img/maze-triangle.png" alt="Triangular maze" width="32%" />
+  <img src="img/maze-hexagon.png" alt="Hexagonal maze" width="32%" />
+  <img src="img/maze-star.png" alt="Star-shaped maze" width="32%" />
+  <img src="img/maze-heart.png" alt="Heart-shaped maze" width="32%" />
 </p>
-  
+
 - **Algorithms**: recursive backtracker, Prim, Kruskal, Wilson, Hunt & Kill, Growing Tree and Aldous-Broder. Each one gives mazes of a different texture.
 - **Size and loops**: from 6 to 60 cells across. **Loops** opens a share of the dead ends, so there is more than one way through.
 - **Solution length**: Any, Short, Medium or Long. The app makes a dozen mazes from the seeds that follow and keeps the one with the shortest, the middle or the longest way through.
