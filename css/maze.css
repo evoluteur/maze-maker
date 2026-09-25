@@ -1,0 +1,110 @@
+.canvas-box {
+  background-color: var(--card-bg);
+  border: 3px solid var(--card-border);
+  border-radius: 10px;
+  overflow: hidden;
+  line-height: 0;
+  cursor: pointer;
+}
+.canvas-box:focus-visible {
+  outline: 3px solid #ffb13b;
+  outline-offset: 2px;
+}
+.canvas-box svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.canvas-box svg:hover {
+  fill: none;
+}
+.stage > .note {
+  margin: 10px 2px 0;
+  min-height: 1.4em;
+}
+.layout.info {
+  margin-top: 0;
+}
+.side.wide {
+  flex: 1 1 340px;
+  max-width: 560px;
+}
+#seed {
+  grid-column: 1 / -1;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 1.05em;
+  margin-top: 6px;
+}
+/* shape buttons: icons instead of words (the themes' generic svg rule is
+   for filled icons, so the outline look is set here) */
+#shape-chips button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+#shape-chips svg,
+#shape-chips svg:hover {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  cursor: pointer;
+}
+/* the Solve panel sits under the maze */
+.solve-panel {
+  margin-top: 6px;
+}
+#stats {
+  max-width: 1000px;
+}
+
+/* keep the title clear of the theme toggle and GitHub link on phones */
+@media only screen and (max-width: 560px) {
+  #omg-header h1 {
+    padding-right: 205px;
+    font-size: 1.4rem;
+  }
+}
+
+/* evol-blue theme: give the stat tiles the same card background as the
+   panels, so they don't sit on the bare blue page */
+html:has(#omg-theme-css[href*="evol-blue"]) #stats .stat {
+  background-color: var(--card-bg);
+}
+
+/* Print only the maze, in black on white, without the player */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #maze,
+  #maze * {
+    visibility: visible;
+  }
+  #maze {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none;
+    background: #fff;
+  }
+  #maze .bg,
+  #maze .floor {
+    fill: #fff;
+  }
+  #maze .walls {
+    stroke: #000;
+  }
+  #maze .heat,
+  #maze #trail,
+  #maze #player {
+    display: none;
+  }
+}

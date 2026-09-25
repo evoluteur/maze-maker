@@ -1,0 +1,33 @@
+{
+  "name": "maze-maker",
+  "version": "1.0.0",
+  "description": "Maze maker: generate square, circular, triangular and heart-shaped mazes with seven algorithms (backtracker, Prim, Kruskal, Wilson, hunt-and-kill, growing tree, Aldous-Broder), solve them with the keyboard or a finger, and export them as SVG or PNG.",
+  "repository": "github:evoluteur/maze-maker",
+  "homepage": "https://evoluteur.github.io/maze-maker/",
+  "copyright": "(c) 2026 Olivier Giulieri",
+  "author": "Olivier Giulieri (https://evoluteur.github.io/)",
+  "license": "MIT",
+  "keywords": [
+    "maze",
+    "maze-generator",
+    "maze-solver",
+    "circular-maze",
+    "theta-maze",
+    "triangle-maze",
+    "heart-maze",
+    "recursive-backtracker",
+    "prim",
+    "kruskal",
+    "wilson",
+    "hunt-and-kill",
+    "growing-tree",
+    "aldous-broder",
+    "spanning-tree",
+    "puzzle",
+    "printable",
+    "svg",
+    "generator",
+    "pwa",
+    "javascript"
+  ]
+}

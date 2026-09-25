@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>What Is a Maze? How Mazes Are Made and Solved</title>
+    <meta name="description" content="What a maze is and how it differs from a labyrinth, how computers generate mazes with the backtracker, Prim, Kruskal, Wilson, Hunt-and-Kill, Growing Tree and Aldous-Broder algorithms, how to solve one, and a short history from hedge mazes to corn mazes." />
+    <meta name="author" content="Olivier Giulieri" />
+    <link rel="canonical" href="https://evoluteur.github.io/maze-maker/about.html" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <meta name="theme-color" content="#1a212d" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Overpass" />
+    <link id="omg-core-css" rel="stylesheet" href="css/core.css" />
+    <link id="omg-theme-css" rel="stylesheet" href="css/themes/dark/dark.css" />
+    <link id="omg-density-css" rel="stylesheet" href="css/densities.css" />
+    <link rel="stylesheet" href="css/common.css" />
+    <link rel="stylesheet" href="css/about.css" />
+    <script src="js/omg.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        addEventListener("load", () => navigator.serviceWorker.register("sw.js"));
+      }
+    </script>
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Evoluteur" />
+    <meta property="og:title" content="What Is a Maze? How Mazes Are Made and Solved" />
+    <meta property="og:description" content="How a maze differs from a labyrinth, how computers generate mazes, and how to find your way through one." />
+    <meta property="og:url" content="https://evoluteur.github.io/maze-maker/about.html" />
+    <meta property="og:image" content="https://raw.githubusercontent.com/evoluteur/maze-maker/main/maze.png" />
+    <meta property="og:image:alt" content="A square maze with its solution drawn in red" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="What Is a Maze? How Mazes Are Made and Solved" />
+    <meta name="twitter:description" content="How a maze differs from a labyrinth, how computers generate mazes, and how to find your way through one." />
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/evoluteur/maze-maker/main/maze.png" />
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "What Is a Maze? How Mazes Are Made and Solved",
+      "description": "How a maze differs from a labyrinth, how computers generate mazes, and how to find your way through one.",
+      "mainEntityOfPage": "https://evoluteur.github.io/maze-maker/about.html",
+      "image": "https://raw.githubusercontent.com/evoluteur/maze-maker/main/maze.png",
+      "author": { "@type": "Person", "name": "Olivier Giulieri", "url": "https://evoluteur.github.io/" },
+      "publisher": { "@type": "Person", "name": "Olivier Giulieri", "url": "https://evoluteur.github.io/" },
+      "isPartOf": { "@type": "WebApplication", "name": "Maze Maker", "url": "https://evoluteur.github.io/maze-maker/" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Maze Maker", "item": "https://evoluteur.github.io/maze-maker/" },
+        { "@type": "ListItem", "position": 2, "name": "About mazes", "item": "https://evoluteur.github.io/maze-maker/about.html" }
+      ]
+    }
+  ]
+}
+    </script>
+  </head>
+
+  <body onload="setupPage('about');" id="omg-body">
+    <div id="omg-header">
+      <h1><a href="index.html">Maze Maker</a></h1>
+      <div id="omg-header-tools">
+        <div id="omg-theme-picker"></div>
+        <a id="omg-github" href="https://github.com/evoluteur/maze-maker" target="_blank" rel="noopener" title="Maze Maker on GitHub" aria-label="Maze Maker on GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a>
+      </div>
+    </div>
+    <h2>About mazes</h2>
+    <div class="content about primer">
+      <p class="tagline">
+        What a maze is, how a computer makes one, and how to find your way through.
+        <button type="button" class="btn-go" onclick="location.href='index.html'">Make one now</button>
+      </p>
+
+      <img class="plate" src="maze.png" alt="A square maze with its solution drawn in red" width="220" height="220" loading="lazy" />
+
+      <h3>What is a maze?</h3>
+      <p class="lede">A maze is a puzzle made of passages: it branches, it has dead ends, and the challenge is to find the way through.</p>
+      <p>That is what sets it apart from a labyrinth. A labyrinth has a single path with no choices, and walking it always takes you to the center (see <a href="https://evoluteur.github.io/labyrinth-maker/">Labyrinth Maker</a>). A maze asks you to decide at every fork, and lets you get lost. The two words are often used for each other, and the labyrinth of the Minotaur in the Greek myth, which nobody could find their way out of, sounds a lot more like a maze.</p>
+      <p>A maze is made of a few parts:</p>
+      <dl class="anatomy">
+        <dt>Cells</dt><dd>The squares of the grid, or the pieces of the rings in a circular maze. Each one is a small room with up to four walls (sometimes more on a circle).</dd>
+        <dt>Passages</dt><dd>The walls that were taken down between neighboring cells.</dd>
+        <dt>Dead ends</dt><dd>Cells with a single way in. The more there are, the more places to go wrong.</dd>
+        <dt>Solution</dt><dd>The way from the entrance to the exit, or to the center.</dd>
+        <dt>Perfect maze</dt><dd>A maze with exactly one path between any two cells: no loops, and no part cut off from the rest.</dd>
+      </dl>
+
+      <h3>How a computer makes a maze</h3>
+      <p>Start from a grid with every wall standing. Take walls down, one at a time, until every cell can be reached, but never take down a wall between two cells that are already connected, or you would make a loop. When you are done, the passages form what mathematicians call a spanning tree of the grid, and the maze is perfect. What changes from one algorithm to the next is the order in which the walls come down, and each order leaves its mark on the maze:</p>
+      <dl class="anatomy">
+        <dt>Backtracker</dt><dd>A depth-first search: from the current cell, move to a random unvisited neighbor, taking the wall down, and back up only when there is nowhere left to go. It makes long winding corridors, few dead ends, and a long solution.</dd>
+        <dt>Prim</dt><dd>Adapted from Robert Prim's 1957 algorithm for minimum spanning trees. The maze grows from one cell, adding at each step a random cell from its edge. Many short dead ends, and a fairly direct solution.</dd>
+        <dt>Kruskal</dt><dd>Adapted from Joseph Kruskal's 1956 algorithm. Take walls in random order, anywhere on the grid, and remove each one that separates two regions not yet joined. An even texture, all over.</dd>
+        <dt>Wilson</dt><dd>David Wilson's 1996 algorithm, built on random walks that erase their own loops. It is slower, but every possible maze on the grid is equally likely to come out, so it has no bias at all.</dd>
+        <dt>Hunt &amp; Kill</dt><dd>A random walk like the Backtracker's, but when it gets stuck it doesn't back up: it scans the grid for an unvisited cell next to the maze, joins it, and walks on from there. Long corridors, with a slightly more even texture.</dd>
+        <dt>Growing Tree</dt><dd>Keeps a list of cells to grow from. Always taking the newest one makes it the Backtracker, always taking a random one makes it close to Prim; Maze Maker picks the newest half of the time, for a maze in between.</dd>
+        <dt>Aldous-Broder</dt><dd>Found independently by David Aldous and Andrei Broder around 1989. A pure random walk that knocks down a wall each time it steps into a cell it has never visited. It is the simplest of all, and like Wilson it gives every possible maze the same chance, but it can wander a long time before it finds the last few cells.</dd>
+      </dl>
+      <p>The Loops setting of Maze Maker then opens some of the dead ends into a neighbor. The maze stops being perfect: there is now more than one way through, and some simple tricks for solving it stop working.</p>
+
+      <h3>How to solve a maze</h3>
+      <p class="lede">Put one hand on a wall and keep it there.</p>
+      <p>In a perfect maze, following one wall, always turning the same way, will take you from the entrance to the exit, because all the walls are connected to the outside. It won't take the shortest way, and it fails in a maze with loops when the goal sits on an island of walls that doesn't touch the outside, like the center of a circular maze. In the 19th century, the French engineer Charles Pierre Trémaux described a method that works in any maze: mark each passage as you walk it, and never take a passage marked twice. Computers do it more simply: a breadth-first search explores every cell one step away from the entrance, then two steps, then three, until it reaches the exit, and finds the shortest way. That is how Maze Maker draws its solution, and how it colors the cells by distance.</p>
+
+      <h3>A short history of mazes</h3>
+      <ul class="timeline">
+        <li><span class="when">Renaissance</span><span>Hedge mazes become a feature of European palace gardens, puzzles to wander in rather than paths to walk.</span></li>
+        <li><span class="when">1690s</span><span>The hedge maze at Hampton Court Palace, near London, is planted for William III. It is the oldest surviving hedge maze in Britain and still open to visitors.</span></li>
+        <li><span class="when">19th century</span><span>Charles Pierre Trémaux describes a method for solving any maze by marking the passages as you go, an early form of depth-first search.</span></li>
+        <li><span class="when">1950</span><span>Claude Shannon builds Theseus, a mechanical mouse that learns its way through a maze of movable walls, one of the first machines that learn.</span></li>
+        <li><span class="when">1970s onward</span><span>Mazes move to screens, in early computer games and in programs that generate a new maze every time.</span></li>
+        <li><span class="when">1993</span><span>The first large corn maze opens in Pennsylvania. Every autumn since, farmers cut new mazes into their fields.</span></li>
+      </ul>
+
+      <h3>About this drawing</h3>
+      <p>Maze Maker draws mazes in four shapes. Square mazes are entered at the top left and left at the bottom right. Circular ones, sometimes called theta mazes, are entered from the outside, with the goal at the center; the rings farther out are longer, so a ring splits its cells in two whenever they would get much wider than they are deep. Triangular mazes cut a big triangle into small ones, each with three neighbors at most, which gives them their zigzag look. Heart-shaped mazes are square grids with every cell outside the heart left out. The algorithms don't care about the shape: to them, a maze is just cells and which cells are next to each other. Every maze comes from a number, its seed: the same settings and seed always give the same maze.</p>
+
+      <div class="shapes">
+        <figure><img src="img/maze-square.png" alt="Square maze" loading="lazy" /><figcaption>Square</figcaption></figure>
+        <figure><img src="img/maze-cicle.png" alt="Circular maze" loading="lazy" /><figcaption>Circle</figcaption></figure>
+        <figure><img src="img/maze-triangle.png" alt="Triangular maze" loading="lazy" /><figcaption>Triangle</figcaption></figure>
+        <figure><img src="img/maze-heart.png" alt="Heart-shaped maze" loading="lazy" /><figcaption>Heart</figcaption></figure>
+      </div>
+
+      <div class="footer">
+        <p><a href="about.html">About mazes</a></p>
+        <p>The code of this page is <a href="https://github.com/evoluteur/maze-maker">Open source</a> with MIT license.</p>
+        <p>Had fun browsing the app? <a href="https://github.com/sponsors/evoluteur">Buy me a coffee by becoming a sponsor</a>.</p>
+        <p>
+          You may also like
+          <a href="https://evoluteur.github.io/labyrinth-maker/" target="_blank" rel="noopener">Labyrinth Maker</a>,
+          <a href="https://evoluteur.github.io/mandala-maker/" target="_blank" rel="noopener">Mandala Maker</a>,
+          <a href="https://evoluteur.github.io/harmonograph-maker/" target="_blank" rel="noopener">Harmonograph Maker</a>,
+          and <a href="https://evoluteur.github.io/sacred-geometry/" target="_blank" rel="noopener">Sacred Geometry</a>.
+          See them all on <a href="https://evoluteur.github.io/esoterica.html" target="_blank" rel="noopener">Esoterica</a>.
+        </p>
+        <p class="copyright">&#169; 2026 <a href="https://evoluteur.github.io/">Olivier Giulieri</a></p>
+      </div>
+    </div>
+  </body>
+</html>

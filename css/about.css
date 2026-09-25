@@ -1,0 +1,168 @@
+/* About page */
+.about {
+  max-width: 720px;
+}
+.about h3 {
+  margin: 34px 0 10px;
+}
+.about p,
+.about li {
+  line-height: 1.6;
+}
+.about ul,
+.about ol {
+  padding-left: 22px;
+  margin: 8px 0 16px;
+}
+.about li {
+  margin-bottom: 8px;
+}
+#omg-header h1 a {
+  color: inherit;
+  text-decoration: none;
+}
+/* the dark theme renders <strong> at normal weight */
+.about strong {
+  font-weight: bold;
+}
+
+/* primer: the about page content, themed via the site variables */
+.primer .lede {
+  font-size: 1.15em;
+  opacity: 0.9;
+}
+.primer .sanskrit {
+  font-style: italic;
+  color: var(--accent, #ffa500);
+}
+.primer .anatomy {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 18px;
+  margin: 0 0 20px;
+  padding: 14px 0;
+  border-block: 1px solid var(--card-border);
+}
+.primer .anatomy dt {
+  font-weight: bold;
+  color: var(--card-strong); /* black in the light theme, white in the dark ones */
+}
+.primer .anatomy dd {
+  margin: 0 0 10px;
+  opacity: 0.85;
+}
+
+.primer .enclosures {
+  padding-left: 0;
+  list-style: none;
+  counter-reset: enc;
+}
+.primer .enclosures li {
+  counter-increment: enc;
+  padding: 10px 0 10px 2.4em;
+  position: relative;
+  border-top: 1px solid var(--card-border);
+}
+.primer .enclosures li:last-child {
+  border-bottom: 1px solid var(--card-border);
+}
+.primer .enclosures li::before {
+  content: counter(enc);
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 1.7em;
+  height: 1.7em;
+  line-height: 1.7em;
+  text-align: center;
+  border-radius: 50%;
+  border: 1px solid var(--card-border);
+  font-size: 0.8em;
+  font-weight: bold;
+}
+.primer .enclosures .sa {
+  font-weight: bold;
+  color: var(--card-strong);
+}
+.primer .enclosures .en {
+  opacity: 0.85;
+}
+
+.primer .timeline {
+  list-style: none;
+  margin: 0 0 22px;
+  padding: 0;
+}
+.primer .timeline li {
+  display: grid;
+  grid-template-columns: 11rem 1fr;
+  gap: 14px;
+  margin: 0;
+  padding: 12px 0;
+  border-top: 1px solid var(--card-border);
+  font-size: 0.95em;
+  line-height: 1.55;
+}
+.primer .timeline li:last-child {
+  border-bottom: 1px solid var(--card-border);
+}
+.primer .timeline .when {
+  font-weight: bold;
+  color: var(--card-strong);
+  font-variant-numeric: tabular-nums;
+}
+@media only screen and (max-width: 480px) {
+  .primer .timeline li {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
+
+/* "Draw one now": a real theme button, without the default top margin so it lines up with the tagline */
+.tagline .btn-go {
+  margin: 20px 0 0 8px;
+  white-space: nowrap;
+}
+
+.about .plate {
+  display: block;
+  max-width: 220px;
+  margin: 0 auto 28px;
+  border-radius: 8px;
+}
+
+/* the four shapes, under "About this drawing" */
+.about .shapes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin: 20px 0 10px;
+}
+.about .shapes figure {
+  margin: 0;
+  text-align: center;
+}
+.about .shapes img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+.about .shapes figcaption {
+  margin-top: 6px;
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+@media only screen and (max-width: 480px) {
+  .about .shapes {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* keep the title clear of the theme toggle and GitHub link on phones */
+@media only screen and (max-width: 560px) {
+  #omg-header h1 {
+    padding-right: 205px;
+    font-size: 1.4rem;
+  }
+}

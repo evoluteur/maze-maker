@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maze Maker</title>
+    <meta
+      name="description"
+      content="Maze maker: generate square, round, triangular and heart-shaped mazes with seven algorithms, solve them with the arrow keys or your finger, show the solution, and download or print them as SVG or PNG. Free, works offline."
+    />
+    <meta name="author" content="Olivier Giulieri" />
+    <link rel="canonical" href="https://evoluteur.github.io/maze-maker/" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <meta name="theme-color" content="#1a212d" />
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Overpass"
+    />
+    <link id="omg-core-css" rel="stylesheet" href="css/core.css" />
+    <link id="omg-theme-css" rel="stylesheet" href="css/themes/dark/dark.css" />
+    <link id="omg-density-css" rel="stylesheet" href="css/densities.css" />
+    <link rel="stylesheet" href="css/common.css" />
+    <link rel="stylesheet" href="css/maze.css" />
+
+    <script src="js/omg.js"></script>
+    <script src="js/maze.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        addEventListener("load", () =>
+          navigator.serviceWorker.register("sw.js"),
+        );
+      }
+    </script>
+  </head>
+
+  <body
+    onload="
+      setupPage('home');
+      initMaze();
+    "
+    id="omg-body"
+  >
+    <div id="omg-header">
+      <h1>Maze Maker</h1>
+      <div id="omg-header-tools">
+        <div id="omg-theme-picker"></div>
+        <a
+          id="omg-github"
+          href="https://github.com/evoluteur/maze-maker"
+          target="_blank"
+          rel="noopener"
+          title="Maze Maker on GitHub"
+          aria-label="Maze Maker on GitHub"
+          ><svg viewBox="0 0 16 16" aria-hidden="true">
+            <path
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+            /></svg
+        ></a>
+      </div>
+    </div>
+    <noscript
+      ><p class="tagline">
+        Maze Maker draws as SVG, so it needs JavaScript. Enable it to make a
+        maze, or read <a href="about.html">about mazes</a>.
+      </p></noscript
+    >
+    <h2>Many turns, one way out</h2>
+    <div class="content">
+      <p class="tagline">
+        A maze is a puzzle: branching passages, dead ends, and a way through.
+        Pick a shape (square, circle, triangle or heart) and an algorithm, and a new maze draws itself. Find your
+        way with the arrow keys or your finger, or let the computer show you.
+        Curious how it works? Read <a href="about.html">about mazes</a>.
+      </p>
+
+      <div class="layout">
+        <div class="stage">
+          <div
+            id="maze"
+            class="canvas-box"
+            tabindex="0"
+            aria-label="Maze. Use the arrow keys to move, or drag from the red dot."
+          ></div>
+          <p class="note" id="play-note" aria-live="polite"></p>
+          <div class="panel solve-panel">
+            <h3>Solve</h3>
+            <p class="note">
+              Arrow keys (or WASD) move the dot. On a circle, up goes toward
+              the center; on a triangle, up and down cross the flat side of
+              the cell. Or drag the dot with your mouse or finger.
+            </p>
+            <div class="btns" style="margin-top: 10px">
+              <button type="button" id="solve">Show solution</button>
+              <button type="button" id="reset" class="ghost">Start over</button>
+            </div>
+            <div class="ctl" style="margin-top: 12px">
+              <label for="speed">Pace</label
+              ><span class="val" id="speed-val"></span>
+              <input type="range" id="speed" min="1" max="20" step="1" />
+            </div>
+          </div>
+
+        </div>
+
+        <div class="side">
+          <div class="panel">
+            <h3>Maze</h3>
+            <div class="btns">
+              <button type="button" id="new">New maze</button>
+            </div>
+            <div
+              class="chips"
+              id="shape-chips"
+              role="group"
+              aria-label="Shape"
+              style="margin-top: 12px"
+            ></div>
+            <div class="ctl">
+              <label for="size">Size</label
+              ><span class="val" id="size-val"></span>
+              <input type="range" id="size" min="6" max="60" step="2" />
+            </div>
+            <div class="ctl">
+              <label for="loops">Loops</label
+              ><span class="val" id="loops-val"></span>
+              <input type="range" id="loops" min="0" max="100" step="5" />
+            </div>
+            <div class="ctl">
+              <label for="length">Solution length</label>
+              <select id="length"></select>
+            </div>
+            <div class="ctl">
+              <label for="seed">Seed</label><span></span>
+              <input type="number" id="seed" min="0" max="1000000000" step="1" />
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Algorithm</h3>
+            <div
+              class="chips"
+              id="algo-chips"
+              role="group"
+              aria-label="Algorithm"
+            ></div>
+            <p class="note" id="algo-note"></p>
+          </div>
+
+          <div class="panel">
+            <h3>Look</h3>
+            <div
+              class="chips"
+              id="look-chips"
+              role="group"
+              aria-label="Colors"
+            ></div>
+            <div class="ctl">
+              <label for="wall">Wall thickness</label
+              ><span class="val" id="wall-val"></span>
+              <input type="range" id="wall" min="4" max="60" step="1" />
+            </div>
+            <label class="opt"
+              ><input type="checkbox" id="l-heat" /> Color by distance from
+              the entrance</label
+            >
+          </div>
+
+          <div class="panel">
+            <h3>Save</h3>
+            <div class="btns">
+              <button type="button" id="export-png">Download PNG</button>
+              <button type="button" id="export-svg" class="ghost">
+                Download SVG
+              </button>
+              <button type="button" id="print" class="ghost">Print</button>
+            </div>
+            <p class="note" style="margin-top: 10px">
+              Downloads include the solution when it is shown. The address of
+              the page keeps the seed, so a link brings back the same maze.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats" id="stats"></div>
+
+      <div class="layout info">
+        <div class="side wide">
+          <div class="panel">
+            <h3>How the maze is made</h3>
+            <p class="note">
+              Start with every wall standing, then knock walls down until
+              every cell can be reached, but never so many that a loop
+              appears. What is left is a perfect maze: exactly one path
+              between any two cells. The Loops slider then opens some of the
+              dead ends, so there is more than one way through.
+            </p>
+          </div>
+        </div>
+        <div class="side wide">
+          <div class="panel">
+            <h3>Why the algorithms look different</h3>
+            <p class="note">
+              All seven make perfect mazes, but each picks the walls in its own
+              way, and it shows. Try the same seed with each one, and turn on
+              <strong>Color by distance</strong> to see how far every cell is
+              from the entrance.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p><a href="about.html">About mazes</a></p>
+        <p>
+          The code of this page is
+          <a href="https://github.com/evoluteur/maze-maker">Open source</a>
+          with MIT license.
+        </p>
+        <p>
+          Had fun browsing the app?
+          <a href="https://github.com/sponsors/evoluteur"
+            >Buy me a coffee by becoming a sponsor</a
+          >.
+        </p>
+        <p>
+          You may also like
+          <a
+            href="https://evoluteur.github.io/labyrinth-maker/"
+            target="_blank"
+            rel="noopener"
+            >Labyrinth Maker</a
+          >,
+          <a
+            href="https://evoluteur.github.io/mandala-maker/"
+            target="_blank"
+            rel="noopener"
+            >Mandala Maker</a
+          >,
+          <a
+            href="https://evoluteur.github.io/harmonograph-maker/"
+            target="_blank"
+            rel="noopener"
+            >Harmonograph Maker</a
+          >, and
+          <a
+            href="https://evoluteur.github.io/sacred-geometry/"
+            target="_blank"
+            rel="noopener"
+            >Sacred Geometry</a
+          >. See them all on
+          <a
+            href="https://evoluteur.github.io/esoterica.html"
+            target="_blank"
+            rel="noopener"
+            >Esoterica</a
+          >.
+        </p>
+        <p class="copyright">
+          &#169; 2026
+          <a href="https://evoluteur.github.io/">Olivier Giulieri</a>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
