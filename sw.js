@@ -57,6 +57,27 @@ self.addEventListener("fetch", (e) => {
     url.hostname === "fonts.googleapis.com" ||
     url.hostname === "fonts.gstatic.com";
   if (e.request.method !== "GET" || !cacheable) return;
+  // pages: the network first, so an update shows up at once; the saved copy
+  // only when offline
+  if (e.request.mode === "navigate") {
+    e.respondWith(
+      fetch(e.request)
+        .then((res) => {
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(e.request, copy));
+          }
+          return res;
+        })
+        .catch(() =>
+          caches
+            .match(e.request, { ignoreSearch: true })
+            .then((cached) => cached || caches.match("index.html")),
+        ),
+    );
+    return;
+  }
+  // everything else: the saved copy first, the network for what is missing
   e.respondWith(
     caches.match(e.request).then(
       (cached) =>
@@ -69,9 +90,7 @@ self.addEventListener("fetch", (e) => {
             }
             return res;
           })
-          .catch(() =>
-            e.request.mode === "navigate" ? caches.match("index.html") : undefined,
-          ),
+          .catch(() => undefined),
     ),
   );
 });
