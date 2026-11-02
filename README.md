@@ -20,7 +20,7 @@ A maze is a puzzle: it has branches and dead ends, and a way through. (A labyrin
 
 <p>
   <img src="img/maze-square.png" alt="Square maze" width="32%" />
-  <img src="img/maze-cicle.png" alt="Circular maze" width="32%" />
+  <img src="img/maze-circle.png" alt="Circular maze" width="32%" />
   <img src="img/maze-triangle.png" alt="Triangular maze" width="32%" />
   <img src="img/maze-hexagon.png" alt="Hexagonal maze" width="32%" />
   <img src="img/maze-star.png" alt="Star-shaped maze" width="32%" />

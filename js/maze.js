@@ -1,9 +1,11 @@
-/* Maze Maker: generates square, circular, triangular and heart-shaped mazes with a choice of
-   algorithms, lets you solve them with the keyboard or a finger, shows the
-   solution, and exports PNG/SVG. Plain JS, no dependencies.
+/* Maze Maker: generates square, circular, triangular, hexagonal, star and
+   heart-shaped mazes with a choice of seven algorithms, lets you solve them
+   with the keyboard or a finger, shows the solution, and exports PNG/SVG or
+   prints them. Plain JS, no dependencies.
 
    A maze here is a grid of cells (a square grid, rings of cells around a
-   center, a triangle of triangles, or a square grid cut to a heart) and a
+   center, a triangle or a six-pointed star of small triangles, a honeycomb
+   of hexagons, or a square grid cut to a heart) and a
    set of passages between neighboring cells. The algorithms
    all carve a spanning tree: every cell is reachable and there is exactly
    one path between any two cells (a "perfect" maze). The Loops setting then
@@ -201,6 +203,25 @@ const heartGrid = (n) => {
   return maskGrid("heart", n, (r, c) => comp[r * n + c] === best, `${n} across`);
 };
 
+// The triangle and star grids are made of small triangles, each given by
+// its three corners.
+const centroid = (v) => [(v[0][0] + v[1][0] + v[2][0]) / 3, (v[0][1] + v[1][1] + v[2][1]) / 3];
+const inTri = (p, v) => {
+  const cross = (a, b) => (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
+  const d = [cross(v[0], v[1]), cross(v[1], v[2]), cross(v[2], v[0])];
+  return !(d.some((x) => x < 0) && d.some((x) => x > 0));
+};
+const triPath = (v) => `M${P(v[0])}L${P(v[1])}L${P(v[2])}Z`;
+const line = (a, b) => `M${P(a)}L${P(b)}`;
+// left and right step along the row, up and down cross the flat edge
+const triStep = (left, right, vert, up) => (i, key) => {
+  let x = -1;
+  if (key === "ArrowLeft") x = left(i);
+  else if (key === "ArrowRight") x = right(i);
+  else if ((key === "ArrowDown" && up(i)) || (key === "ArrowUp" && !up(i))) x = vert(i);
+  return x >= 0 ? [x] : [];
+};
+
 // A big triangle cut into small ones: row r (from the top) has 2r + 1
 // triangles, pointing up at even positions and down at odd ones. The
 // entrance is under the bottom left corner, the exit under the bottom right.
@@ -220,20 +241,11 @@ const triangleGrid = (n) => {
       ? [[x0, r * h], [x1 + s, (r + 1) * h], [x1, (r + 1) * h]]
       : [[x0, r * h], [x0 + s, r * h], [x1 + s, (r + 1) * h]];
   };
-  const center = (i) => {
-    const v = verts(i);
-    return [(v[0][0] + v[1][0] + v[2][0]) / 3, (v[0][1] + v[1][1] + v[2][1]) / 3];
-  };
+  const center = (i) => centroid(verts(i));
   const nb = [];
   for (let i = 0; i < N; i++) nb.push([id(row[i], pos[i] - 1), id(row[i], pos[i] + 1), vert(i)].filter((x) => x >= 0));
   const start = id(n - 1, 0), goal = id(n - 1, 2 * n - 2);
   const side = n * s + 2 * W; // a square view, with the triangle in the middle
-  const inTri = (p, v) => {
-    const cross = (a, b) => (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
-    const d = [cross(v[0], v[1]), cross(v[1], v[2]), cross(v[2], v[0])];
-    return !(d.some((x) => x < 0) && d.some((x) => x > 0));
-  };
-  const seg = (a, b) => `M${P(a)}L${P(b)}`;
   return {
     kind: "triangle", N, nb, start, goal, seams: true,
     label: `${n} rows`,
@@ -251,14 +263,8 @@ const triangleGrid = (n) => {
       }
       return -1;
     },
-    // left and right step along the row, up and down cross the flat edge
-    step: (i, key) => {
-      if (key === "ArrowLeft") return [id(row[i], pos[i] - 1)].filter((x) => x >= 0);
-      if (key === "ArrowRight") return [id(row[i], pos[i] + 1)].filter((x) => x >= 0);
-      if ((key === "ArrowDown" && up(i)) || (key === "ArrowUp" && !up(i))) return [vert(i)].filter((x) => x >= 0);
-      return [];
-    },
-    cellShape: (i) => { const v = verts(i); return `M${P(v[0])}L${P(v[1])}L${P(v[2])}Z`; },
+    step: triStep((i) => id(row[i], pos[i] - 1), (i) => id(row[i], pos[i] + 1), vert, up),
+    cellShape: (i) => triPath(verts(i)),
     floorD: () => `M0 0L${P([(n * s) / 2, n * h])}L${P([(-n * s) / 2, n * h])}Z`,
     seg: (a, b) => ` L${P(center(b))}`,
     // each cell draws its left edge, and an upward cell its bottom edge;
@@ -268,12 +274,12 @@ const triangleGrid = (n) => {
       for (let i = 0; i < N; i++) {
         const v = verts(i), r = row[i], k = pos[i];
         const left = id(r, k - 1);
-        if (left < 0 || !lk(i, left)) d += seg(v[0], v[2]);
-        if (k === 2 * r) d += seg(v[0], v[1]);
+        if (left < 0 || !lk(i, left)) d += line(v[0], v[2]);
+        if (k === 2 * r) d += line(v[0], v[1]);
         if (up(i)) {
           const below = vert(i);
           const open = r === n - 1 && (i === start || i === goal);
-          if (!open && (below < 0 || !lk(i, below))) d += seg(v[2], v[1]);
+          if (!open && (below < 0 || !lk(i, below))) d += line(v[2], v[1]);
         }
       }
       return d;
@@ -298,19 +304,13 @@ const starGrid = (m) => {
       ? [[x0 + s / 2, r * h], [x0 + s, (r + 1) * h], [x0, (r + 1) * h]]
       : [[x0, r * h], [x0 + s, r * h], [x0 + s / 2, (r + 1) * h]];
   };
-  const inTri = (pt, v) => {
-    const cross = (a, b) => (b[0] - a[0]) * (pt[1] - a[1]) - (b[1] - a[1]) * (pt[0] - a[0]);
-    const d = [cross(v[0], v[1]), cross(v[1], v[2]), cross(v[2], v[0])];
-    return !(d.some((x) => x < 0) && d.some((x) => x > 0));
-  };
   const bigUp = [[X, 0], [X + 1.5 * m * s, 3 * m * h], [X - 1.5 * m * s, 3 * m * h]];
   const bigDown = [[X - 1.5 * m * s, m * h], [X + 1.5 * m * s, m * h], [X, 4 * m * h]];
   const at = new Int32Array(R * C).fill(-1);
   const rc = [];
   for (let r = 0; r < R; r++) {
     for (let k = 0; k < C; k++) {
-      const v = vertsRK(r, k);
-      const c = [(v[0][0] + v[1][0] + v[2][0]) / 3, (v[0][1] + v[1][1] + v[2][1]) / 3];
+      const c = centroid(vertsRK(r, k));
       if (inTri(c, bigUp) || inTri(c, bigDown)) { at[r * C + k] = rc.length; rc.push([r, k]); }
     }
   }
@@ -321,10 +321,7 @@ const starGrid = (m) => {
   const vertRK = (i) => (up(i) ? [rc[i][0] + 1, rc[i][1]] : [rc[i][0] - 1, rc[i][1]]);
   const vert = (i) => idAt(...vertRK(i));
   const nb = rc.map(([r, k], i) => [idAt(r, k - 1), idAt(r, k + 1), vert(i)].filter((x) => x >= 0));
-  const center = (i) => {
-    const v = verts(i);
-    return [(v[0][0] + v[1][0] + v[2][0]) / 3, (v[0][1] + v[1][1] + v[2][1]) / 3];
-  };
+  const center = (i) => centroid(verts(i));
   // entrance: the leftmost cell of row m (the tip of the upper left point, a
   // downward cell with a flat top); exit: the rightmost cell of row 3m - 1
   let start = -1, goal = -1;
@@ -332,7 +329,6 @@ const starGrid = (m) => {
   for (let k = C - 1; k >= 0 && goal < 0; k--) goal = idAt(3 * m - 1, k);
   const midX = (i, a, b) => (verts(i)[a][0] + verts(i)[b][0]) / 2;
   const side = Math.max(3 * m * s, 4 * m * h) + 2 * W;
-  const seg = (a, b) => `M${P(a)}L${P(b)}`;
   return {
     kind: "star", N, nb, start, goal, seams: true,
     label: `${N} cells`,
@@ -348,14 +344,8 @@ const starGrid = (m) => {
       }
       return -1;
     },
-    step: (i, key) => {
-      const [r, k] = rc[i];
-      if (key === "ArrowLeft") return [idAt(r, k - 1)].filter((x) => x >= 0);
-      if (key === "ArrowRight") return [idAt(r, k + 1)].filter((x) => x >= 0);
-      if ((key === "ArrowDown" && up(i)) || (key === "ArrowUp" && !up(i))) return [vert(i)].filter((x) => x >= 0);
-      return [];
-    },
-    cellShape: (i) => { const v = verts(i); return `M${P(v[0])}L${P(v[1])}L${P(v[2])}Z`; },
+    step: triStep((i) => idAt(rc[i][0], rc[i][1] - 1), (i) => idAt(rc[i][0], rc[i][1] + 1), vert, up),
+    cellShape: (i) => triPath(verts(i)),
     floorD: () => [bigUp, bigDown].map((t) => `M${P(t[0])}L${P(t[1])}L${P(t[2])}Z`).join(""),
     seg: (a, b) => ` L${P(center(b))}`,
     // each cell draws its left edge, its right edge on the outline, and its
@@ -365,11 +355,11 @@ const starGrid = (m) => {
       for (let i = 0; i < N; i++) {
         const v = verts(i), [r, k] = rc[i];
         const left = idAt(r, k - 1), right = idAt(r, k + 1), other = vert(i);
-        if (left < 0 || !lk(i, left)) d += seg(v[0], v[2]);
-        if (right < 0) d += up(i) ? seg(v[0], v[1]) : seg(v[1], v[2]);
+        if (left < 0 || !lk(i, left)) d += line(v[0], v[2]);
+        if (right < 0) d += up(i) ? line(v[0], v[1]) : line(v[1], v[2]);
         if (up(i)) {
-          if (!(i === goal && other < 0) && (other < 0 || !lk(i, other))) d += seg(v[2], v[1]);
-        } else if (other < 0 && i !== start) d += seg(v[0], v[1]);
+          if (!(i === goal && other < 0) && (other < 0 || !lk(i, other))) d += line(v[2], v[1]);
+        } else if (other < 0 && i !== start) d += line(v[0], v[1]);
       }
       return d;
     },
