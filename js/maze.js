@@ -372,27 +372,32 @@ const starGrid = (m) => {
 const hexGrid = (n) => {
   const a = W * 0.62; // cell radius, center to corner
   const D = [[1, 0], [0, 1], [-1, 1], [-1, 0], [0, -1], [1, -1]]; // at 0, 60, ... 300 degrees
-  const key = (q, r) => `${q},${r}`;
-  const qr = [], at = new Map();
+  const span = 2 * n - 1; // (q, r) -> cell id, in a span x span array
+  const qr = [], at = new Int32Array(span * span).fill(-1);
   for (let r = -(n - 1); r <= n - 1; r++) {
     for (let q = -(n - 1); q <= n - 1; q++) {
       if (Math.abs(q + r) > n - 1) continue;
-      at.set(key(q, r), qr.length);
+      at[(r + n - 1) * span + q + n - 1] = qr.length;
       qr.push([q, r]);
     }
   }
   const N = qr.length;
-  const idAt = (q, r) => (at.has(key(q, r)) ? at.get(key(q, r)) : -1);
+  const idAt = (q, r) => (Math.abs(q) < n && Math.abs(r) < n ? at[(r + n - 1) * span + q + n - 1] : -1);
   const nbDir = (i, d) => idAt(qr[i][0] + D[d][0], qr[i][1] + D[d][1]);
   const nb = qr.map((_, i) => D.map((_, d) => nbDir(i, d)).filter((x) => x >= 0));
-  const center = (i) => [a * Math.sqrt(3) * (qr[i][0] + qr[i][1] / 2), a * 1.5 * qr[i][1]];
-  const corner = (i, deg) => {
-    const [x, y] = center(i), t = (deg * Math.PI) / 180;
-    return [x + a * Math.cos(t), y + a * Math.sin(t)];
-  };
+  const centers = qr.map(([q, r]) => [a * Math.sqrt(3) * (q + r / 2), a * 1.5 * r]);
+  const center = (i) => centers[i];
+  // corner c of a cell is at 60c - 30 degrees; each cell's six corners are
+  // formatted for the svg path once, on first use
+  const offs = [0, 1, 2, 3, 4, 5].map((c) => {
+    const t = ((60 * c - 30) * Math.PI) / 180;
+    return [a * Math.cos(t), a * Math.sin(t)];
+  });
+  const cornerTxt = new Array(N);
+  const corners = (i) => cornerTxt[i] || (cornerTxt[i] = offs.map(([dx, dy]) => P([centers[i][0] + dx, centers[i][1] + dy])));
   const start = idAt(-(n - 1), 0), goal = idAt(n - 1, 0);
   const w = (2 * n - 1) * Math.sqrt(3) * a, side = w + 2 * W;
-  const edge = (i, d) => `M${P(corner(i, 60 * d - 30))}L${P(corner(i, 60 * d + 30))}`;
+  const edge = (i, d) => { const c = corners(i); return `M${c[d]}L${c[(d + 1) % 6]}`; };
   return {
     kind: "hexagon", N, nb, start, goal, seams: true,
     label: `${n} rings`,
@@ -414,7 +419,7 @@ const hexGrid = (n) => {
       const dirs = { ArrowRight: [0], ArrowLeft: [3], ArrowUp: [5, 4], ArrowDown: [1, 2] }[k] || [];
       return dirs.map((d) => nbDir(i, d)).filter((x) => x >= 0);
     },
-    cellShape: (i) => [0, 1, 2, 3, 4, 5].map((c, j) => `${j ? "L" : "M"}${P(corner(i, 60 * c - 30))}`).join("") + "Z",
+    cellShape: (i) => `M${corners(i).join("L")}Z`,
     floorD() { return qr.map((_, i) => this.cellShape(i)).join(""); },
     seg: (a2, b) => ` L${P(center(b))}`,
     // each cell draws its walls toward the three neighbors at 0, 60 and
@@ -1018,10 +1023,16 @@ const initMaze = () => {
   chips("shape-chips", SHAPES, (s) => change("shape", s.id));
   chips("algo-chips", ALGOS, (a) => change("algo", a.id));
   chips("look-chips", LOOKS, (l) => { S.look = l.id; save(); draw(); });
+  // a slider sends many input events while it is dragged: rebuild at most
+  // once per frame, with its latest value
   const slider = (id, k, redo) => {
     const el = $(id);
     el.value = S[k];
-    el.oninput = () => { S[k] = +el.value; save(); redo(); };
+    let frame = 0;
+    el.oninput = () => {
+      S[k] = +el.value;
+      if (!frame) frame = requestAnimationFrame(() => { frame = 0; save(); redo(); });
+    };
   };
   slider("size", "size", regenerate);
   slider("loops", "loops", regenerate);

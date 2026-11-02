@@ -1,4 +1,4 @@
-const CACHE = "maze-maker-v16";
+const CACHE = "maze-maker-v17";
 const ASSETS = [
   "./",
   "index.html",
